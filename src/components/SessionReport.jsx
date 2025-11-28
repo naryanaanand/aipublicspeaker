@@ -66,6 +66,32 @@ const SessionReport = ({ data, onClose }) => {
                     </div>
                 </div>
 
+                {/* Advanced Delivery Metrics */}
+                <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', background: 'var(--bg-secondary)' }}>
+                    <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Delivery Analysis</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+                        <div>
+                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pauses</h4>
+                            <p style={{ fontSize: '0.95rem', marginTop: '0.5rem' }}>{data.pause_analysis || "No pause data available."}</p>
+                        </div>
+                        <div>
+                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pacing</h4>
+                            <p style={{ fontSize: '0.95rem', marginTop: '0.5rem' }}>{data.pacing_analysis || "No pacing data available."}</p>
+                        </div>
+                        <div>
+                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stutters</h4>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                                {data.stutter_analysis?.count || 0}
+                            </div>
+                            {data.stutter_analysis?.examples?.length > 0 && (
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                                    e.g., "{data.stutter_analysis.examples[0]}"
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
                 {data.rephrasing && data.rephrasing.length > 0 && (
                     <div>
                         <h3 style={{ marginBottom: '1rem' }}>Smart Rephrasing</h3>

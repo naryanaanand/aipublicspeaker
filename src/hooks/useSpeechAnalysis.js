@@ -7,13 +7,9 @@ export const useSpeechAnalysis = () => {
     const [volume, setVolume] = useState(0);
     const [fillerWordCount, setFillerWordCount] = useState(0);
 
-    const recognitionRef = useRef(null);
-    const audioContextRef = useRef(null);
-    const analyserRef = useRef(null);
-    const sourceRef = useRef(null);
-    const streamRef = useRef(null);
-    const startTimeRef = useRef(null);
-    const wordCountRef = useRef(0);
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const [audioBlob, setAudioBlob] = useState(null);
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -72,12 +68,27 @@ export const useSpeechAnalysis = () => {
                 if (isRecording) requestAnimationFrame(updateVolume);
             };
 
+            // MediaRecorder Setup for Blob Capture
+            mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            audioChunksRef.current = [];
+            mediaRecorderRef.current.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+            mediaRecorderRef.current.onstop = () => {
+                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                setAudioBlob(blob);
+            };
+            mediaRecorderRef.current.start();
+
             setIsRecording(true);
             startTimeRef.current = Date.now();
             wordCountRef.current = 0;
             setTranscript('');
             setWpm(0);
             setFillerWordCount(0);
+            setAudioBlob(null);
 
             if (recognitionRef.current) recognitionRef.current.start();
             updateVolume();
@@ -91,6 +102,7 @@ export const useSpeechAnalysis = () => {
     const stopRecording = useCallback(() => {
         setIsRecording(false);
         if (recognitionRef.current) recognitionRef.current.stop();
+        if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
 
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop());
@@ -108,6 +120,7 @@ export const useSpeechAnalysis = () => {
         wpm,
         volume,
         fillerWordCount,
-        stream: streamRef.current
+        stream: streamRef.current,
+        audioBlob
     };
 };

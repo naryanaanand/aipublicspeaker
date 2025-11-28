@@ -5,7 +5,7 @@ import { initializeGemini, analyzeSpeech } from '../services/ai';
 import SessionReport from './SessionReport';
 
 const PracticeMode = () => {
-    const { isRecording, startRecording, stopRecording, wpm, volume, fillerWordCount, transcript } = useSpeechAnalysis();
+    const { isRecording, startRecording, stopRecording, wpm, volume, fillerWordCount, transcript, audioBlob } = useSpeechAnalysis();
     const videoRef = useRef(null);
 
     const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -85,12 +85,14 @@ const PracticeMode = () => {
     };
 
     const handleAnalyze = async () => {
-        if (!transcript) return;
+        // Allow analysis if we have audio blob OR transcript (fallback)
+        if (!audioBlob && !transcript) return;
 
         setIsAnalyzing(true);
         try {
             initializeGemini(apiKey || envApiKey);
-            const result = await analyzeSpeech(transcript);
+            // Pass audioBlob first, transcript as fallback
+            const result = await analyzeSpeech(audioBlob, transcript);
             setReportData(result);
 
             // Save to History
